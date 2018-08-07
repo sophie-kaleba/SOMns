@@ -30,6 +30,7 @@ public final class UncaughtExceptions implements UncaughtExceptionHandler {
       Output.errorPrintln("Processing failed for: "
           + thread.getActivity().toString());
     }
+    Output.errorPrintln("E value: " + e.getClass().getName());
     e.printStackTrace();
 
     vm.requestExit(2);
