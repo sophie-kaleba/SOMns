@@ -500,7 +500,7 @@ public final class MixinDefinition {
     VM.callerNeedsToBeOptimized(
         "only meant for code loading, which is supposed to be on the slowpath");
     CallTarget callTarget = superclassMixinResolution.createCallTarget();
-    SClass superClass = (SClass) callTarget.call(Nil.nilObject, null);
+    SClass superClass = (SClass) callTarget.call(Nil.nilObject);
     SClass classObject = instantiateClass(Nil.nilObject, superClass);
     return classObject;
   }
