@@ -1,14 +1,7 @@
 package som;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
-
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Engine;
-
+import bd.inlining.InlinableNodes;
+import bd.tools.structure.StructuralProbe;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
@@ -20,10 +13,9 @@ import com.oracle.truffle.api.nodes.GraphPrintVisitor;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.source.SourceSection;
 import com.oracle.truffle.tools.profiler.CPUSampler;
-
-import bd.inlining.InlinableNodes;
-import bd.tools.structure.StructuralProbe;
 import coveralls.truffle.Coverage;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Engine;
 import som.compiler.MixinDefinition;
 import som.compiler.MixinDefinition.SlotDefinition;
 import som.compiler.SourcecodeCompiler;
@@ -40,11 +32,7 @@ import som.primitives.processes.ChannelPrimitives;
 import som.primitives.processes.ChannelPrimitives.ProcessThreadFactory;
 import som.primitives.threading.TaskThreads.ForkJoinThreadFactory;
 import som.primitives.threading.ThreadingModule;
-import som.vm.NotYetImplementedException;
-import som.vm.ObjectSystem;
-import som.vm.Primitives;
-import som.vm.VmOptions;
-import som.vm.VmSettings;
+import som.vm.*;
 import som.vmobjects.SClass;
 import som.vmobjects.SInvokable;
 import som.vmobjects.SObjectWithClass.SObjectWithoutFields;
@@ -57,6 +45,11 @@ import tools.dym.DynamicMetrics;
 import tools.snapshot.SnapshotBackend;
 import tools.superinstructions.CandidateIdentifier;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 public final class VM {
 
@@ -109,6 +102,10 @@ public final class VM {
     processesPool = null;
     forkJoinPool = null;
     threadPool = null;
+  }
+
+  public static boolean isHotSpotVM() {
+    return true;
   }
 
   public WebDebugger getWebDebugger() {
@@ -426,4 +423,5 @@ public final class VM {
 
     ChannelPrimitives.resetClassReferences();
   }
+
 }
