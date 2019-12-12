@@ -135,6 +135,8 @@ class Harness usingPlatform: platform = Value (
           total > maxRuntime ifTrue: [
             numIterations:: i.
             ^ self ]].
+        
+        system experimentalGC: 1.
         ].
     )
 
@@ -145,7 +147,7 @@ class Harness usingPlatform: platform = Value (
     )
 
     print: bench run: runTime = (
-      (name + ': iterations=1' + ' runtime: ' + runTime + 'us') println
+      (*(name + ': iterations=1' + ' runtime: ' + runTime + 'us')*)runTime println
     )
 
     public printTotal = (

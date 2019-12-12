@@ -1,5 +1,8 @@
 package tools.dym;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.oracle.truffle.api.frame.FrameInstance;
 import org.graalvm.collections.EconomicSet;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.Instrument;
@@ -158,6 +162,9 @@ public class DynamicMetrics extends TruffleInstrument {
   private final StructuralProbe<SSymbol, MixinDefinition, SInvokable, SlotDefinition, Variable> structuralProbe;
 
   private final Set<RootNode> rootNodes;
+  private CsvWriter file;
+  private FileWriter pw;
+  private final String metricsFolder;
 
   @CompilationFinal private static Instrumenter instrumenter; // TODO: this is one of those
                                                               // evil hacks
@@ -169,7 +176,7 @@ public class DynamicMetrics extends TruffleInstrument {
     return false;
   }
 
-  public DynamicMetrics() {
+  public DynamicMetrics() throws IOException {
     structuralProbe = new StructuralProbe<>();
 
     methodInvocationCounter = new HashMap<>();
@@ -192,14 +199,28 @@ public class DynamicMetrics extends TruffleInstrument {
 
     rootNodes = new HashSet<>();
 
+    /* file handling for logging stack depth */
+    metricsFolder = System.getProperty("dm.metrics", "metrics");
+    new File(metricsFolder).mkdirs();
+    File csvfile = new File(metricsFolder+"/stack-depth.csv");
+    csvfile.createNewFile();
+    pw = new FileWriter(csvfile.getAbsoluteFile(), true);
+
     assert "DefaultTruffleRuntime".equals(
         Truffle.getRuntime().getClass()
                .getSimpleName()) : "To get metrics for the lexical, unoptimized behavior, please run this tool without Graal";
   }
 
-  public void enterMethod() {
+  public void enterMethod(InvocationProfilingNode node) throws IOException {
+    SourceSection ss = node.getProfile().getMethod().getSourceSection();
+    String currentLocation = ss.getSource().getPath()+"#"+ss.getStartLine();
+
     methodStackDepth += 1;
     maxStackDepth = Math.max(methodStackDepth, maxStackDepth);
+
+    pw.append(String.valueOf(methodStackDepth)).append(",").append(currentLocation);
+    pw.write(System.lineSeparator());
+
     assert methodStackDepth > 0;
   }
 
@@ -455,6 +476,12 @@ public class DynamicMetrics extends TruffleInstrument {
         maxStackDepth, getAllStatementsAlsoNotExecuted());
 
     outputAllTruffleMethodsToIGV();
+
+    try {
+      pw.flush();
+      pw.close();
+    } catch (IOException e) {
+    }
   }
 
   private List<SourceSection> getAllStatementsAlsoNotExecuted() {

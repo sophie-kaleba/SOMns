@@ -1,10 +1,13 @@
 package tools.dym.nodes;
 
+import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeCost;
 
 import tools.dym.DynamicMetrics;
 import tools.dym.profiles.InvocationProfile;
+
+import java.io.IOException;
 
 
 /**
@@ -25,7 +28,10 @@ public class InvocationProfilingNode extends CountingNode<InvocationProfile> {
   protected void onEnter(final VirtualFrame frame) {
     super.onEnter(frame);
     counter.profileArguments(frame.getArguments());
-    meter.enterMethod();
+    try {
+      meter.enterMethod(this);
+    } catch (IOException e) {
+    }
   }
 
   @Override

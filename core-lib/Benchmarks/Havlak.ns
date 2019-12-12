@@ -20,6 +20,7 @@ class Havlak usingPlatform: platform andHarness: harness = (
   private IdentitySet = platform collections IdentitySet.
   private Set        = platform collections Set.
   private Array      = platform kernel Array.
+  private system = platform system.
 |
 )(
   private class HavlakBenchmark = Benchmark ()(
@@ -271,7 +272,8 @@ class Havlak usingPlatform: platform andHarness: harness = (
       constructCFG: parLoop p: pparLoops p: ppparLoops.
 
       findLoops: lsg.
-      findLoopIterations timesRepeat: [
+      findLoopIterations timesRepeat: [:i |
+        (*i = 51 ifTrue: [system experimentalGC: 2].*)
         findLoops: LoopStructureGraph new ].
 
       lsg calculateNestingLevel.

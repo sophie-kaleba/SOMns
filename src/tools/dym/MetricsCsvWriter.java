@@ -57,18 +57,20 @@ public final class MetricsCsvWriter {
   private final StructuralProbe<SSymbol, MixinDefinition, SInvokable, SlotDefinition, Variable> structuralProbe;
 
   private final int                 maxStackHeight;
+  private final int                 currentStackHeight;
   private final List<SourceSection> allStatements;
 
   private MetricsCsvWriter(
       final Map<String, Map<SourceSection, ? extends JsonSerializable>> data,
       final String metricsFolder,
       final StructuralProbe<SSymbol, MixinDefinition, SInvokable, SlotDefinition, Variable> probe,
-      final int maxStackHeight, final List<SourceSection> allStatements) {
+      final int currentStackHeight, final List<SourceSection> allStatements) {
     this.data = data;
     this.metricsFolder = metricsFolder;
     this.structuralProbe = probe;
-    this.maxStackHeight = maxStackHeight;
+    this.currentStackHeight = currentStackHeight;
     this.allStatements = allStatements;
+    this.maxStackHeight = 0;
   }
 
   public static void fileOut(
@@ -76,26 +78,26 @@ public final class MetricsCsvWriter {
       final String metricsFolder,
       // TODO: remove direct StructuralProbe passing hack
       final StructuralProbe<SSymbol, MixinDefinition, SInvokable, SlotDefinition, Variable> structuralProbe,
-      final int maxStackHeight, final List<SourceSection> allStatements) {
-    new MetricsCsvWriter(data, metricsFolder, structuralProbe, maxStackHeight,
+      final int currentStackHeight, final List<SourceSection> allStatements) {
+    new MetricsCsvWriter(data, metricsFolder, structuralProbe, currentStackHeight,
         allStatements).createCsvFiles();
   }
 
   private void createCsvFiles() {
     new File(metricsFolder).mkdirs();
 
-    methodActivations();
-    methodCallsites();
-    closureApplications();
-    newObjectCount();
-    newArrayCount();
-    fieldAccesses();
-    localAccesses();
-    usedClassesAndMethods();
+//    methodActivations();
+//    methodCallsites();
+//    closureApplications();
+//    newObjectCount();
+//    newArrayCount();
+//    fieldAccesses();
+//    localAccesses();
+//    usedClassesAndMethods();
     generalStats();
-    branchProfiles();
-    operationProfiles();
-    loopProfiles();
+//    branchProfiles();
+//    operationProfiles();
+//    loopProfiles();
   }
 
   private static void processCoverage(final long counterVal,
