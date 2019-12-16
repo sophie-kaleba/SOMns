@@ -15,7 +15,11 @@ class ExtensionTests usingPlatform: platform testFramework: minitest = Value (
   private jarName    = 'extension/build/test-extension.jar'.
   private modulePath = (ObjectMirror reflecting: self) classMirror classDefinition filePath.
   private jarPath    = ((FilePath for: modulePath) containingDirectory / jarName) pattern.
-|)(
+|
+  (* ExtensionTests are skipped if the current runtime does not support extensions*)
+  (system supportsExtensions) ifFalse: [ ^ nil ].
+  )(
+
   public class BasicTest = TestContext ()(
 
     private loadModule = (

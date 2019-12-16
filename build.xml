@@ -92,7 +92,6 @@
         <pathelement location="${sdk.build}/word-api.jar" />
         <pathelement location="${sdk.build}/polyglot-tck.jar" />
         <pathelement location="${lib.dir}/somns-deps-dev.jar" />
-        
 
         <pathelement location="${truffle.build}/truffle-debug.jar" />
         <pathelement location="${truffle.build}/truffle-dsl-processor.jar" />
@@ -413,16 +412,17 @@
     </target>
 
 
-    <target name="som-native-tests" depends="native">
+    <target name="som-native-tests" depends="native, jacoco-lib">
       <travis target="som-native-tests" start="Run SOMns Tests on som-native" />
       <!-- delete old coverage data, this should be the first task generating coverage data -->
       <delete file="all.gcov" />
 
       <exec executable="./som-native" failonerror="true">
-        <arg value="--coverage" />
+  <!--  temporarily deactivate coverage data for native tests - fail
+	<arg value="\-\-coverage" />
         <arg value="all.gcov" />
-        <arg value="--java-coverage" />
-        <arg value="jacoco.exec" />
+        <arg value="\-\-java-coverage" />
+        <arg value="jacoco.exec" /> -->
         <arg value="-G" />
         <arg value="${corelib.dir}/TestSuite/TestRunner.ns" />
       </exec>
