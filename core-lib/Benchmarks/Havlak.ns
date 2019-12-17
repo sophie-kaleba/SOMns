@@ -272,9 +272,13 @@ class Havlak usingPlatform: platform andHarness: harness = (
       constructCFG: parLoop p: pparLoops p: ppparLoops.
 
       findLoops: lsg.
-      findLoopIterations timesRepeat: [:i |
-        (*i = 51 ifTrue: [system experimentalGC: 2].*)
-        findLoops: LoopStructureGraph new ].
+      1 to: findLoopIterations do: [ :i <Integer> |
+         i = 51 ifTrue: [system experimentalGC: 2]. 
+        findLoops: LoopStructureGraph new. 
+      ].
+      (* findLoopIterations timesRepeat: [ i:: 
+        i = 51 ifTrue: [system experimentalGC: 2]. 
+        findLoops: LoopStructureGraph new ]. *)
 
       lsg calculateNestingLevel.
       ^ { lsg numLoops. cfg numNodes }
