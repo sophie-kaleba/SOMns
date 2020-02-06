@@ -64,4 +64,9 @@ class System usingVmMirror: vmMirror = Value (
 
   (* Checking if extensions are supported by the current VM *)
   public supportsExtensions = ( ^ vmMirror featuresSupportsExtensions: nil )
+
+  (* wrap a potential call to GC - allows to a have call to a primitive either way *)
+  public experimentalGC: obj = ( vmMirror experimentalGC: obj. )
+ )
+
 )
