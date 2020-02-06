@@ -524,6 +524,16 @@ public final class SystemPrims {
     }
   }
 
+  @GenerateNodeFactory
+  @Primitive(primitive = "experimentalGC:")
+  public abstract static class ExperimentalGCPrim extends UnarySystemOperation {
+    @Specialization
+    public final Object doSObject(final long benchType) {
+      if (benchType == 2) System.gc();
+      return benchType;
+    }
+  }
+
   static {
     long current = System.nanoTime() / 1000L;
     startMicroTime = current;
