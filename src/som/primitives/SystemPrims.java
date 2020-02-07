@@ -559,8 +559,11 @@ public final class SystemPrims {
   @Primitive(primitive = "experimentalGC:")
   public abstract static class ExperimentalGCPrim extends UnarySystemOperation {
     @Specialization
+    @TruffleBoundary
     public final Object doSObject(final long benchType) {
-      if (benchType == 2) System.gc();
+      if (benchType == 1) {
+        System.gc();
+      }
       return benchType;
     }
   }
