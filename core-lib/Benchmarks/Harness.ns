@@ -98,6 +98,7 @@ class Harness usingPlatform: platform = Value (
       public printAll        ::= true.
       public benchmarkSuite  ::= nil.
       public name            ::= nil.
+      public triggerGC       ::= 0.
     |
   )(
 
@@ -135,6 +136,8 @@ class Harness usingPlatform: platform = Value (
           total > maxRuntime ifTrue: [
             numIterations:: i.
             ^ self ]].
+
+        system experimentalGC: triggerGC.
         ].
     )
 
@@ -164,8 +167,10 @@ class Harness usingPlatform: platform = Value (
         args size > 4 ifTrue: [
           run innerIterations: (args at: 5) asInteger.
           args size > 5 ifTrue: [
-            run numThreads: (args at: 6) asInteger
-    ] ] ] ]
+            run numThreads: (args at: 6) asInteger.
+            args size > 6 ifTrue: [
+              run triggerGC: (args at: 7) asInteger.
+    ] ] ] ] ]
   )
 
   public main: args = (
