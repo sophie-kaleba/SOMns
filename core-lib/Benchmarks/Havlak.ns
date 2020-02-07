@@ -20,6 +20,7 @@ class Havlak usingPlatform: platform andHarness: harness = (
   private IdentitySet = platform collections IdentitySet.
   private Set        = platform collections Set.
   private Array      = platform kernel Array.
+  private system = platform system.
 |
 )(
   private class HavlakBenchmark = Benchmark ()(
@@ -269,6 +270,8 @@ class Havlak usingPlatform: platform andHarness: harness = (
       constructSimpleCFG.
       addDummyLoops: numDummyLoops.
       constructCFG: parLoop p: pparLoops p: ppparLoops.
+
+      system experimentalGC: 0. 
 
       findLoops: lsg.
       findLoopIterations timesRepeat: [
