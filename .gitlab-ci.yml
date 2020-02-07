@@ -55,6 +55,14 @@ benchmark_savina_job:
     - ant compile
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-Savina
 
+benchmark_havlak_native_job:
+  stage: benchmark
+  tags: [benchmark, infinity]
+  allow_failure: true
+  script:
+    - ant native
+    - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-native-Havlak
+
 benchmark_job:
   stage: benchmark
   tags: [benchmarks, infinity]
