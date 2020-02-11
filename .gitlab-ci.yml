@@ -1,6 +1,6 @@
 stages:
   - build-and-test
-  - benchmark-havlak-only
+  - benchmark
   - full-test
   - virtualbox-image
 
@@ -47,39 +47,45 @@ svm_tests:
   script:
     - ant native-tests
 
-benchmark_savina_job:
-  stage: benchmark
-  tags: [benchmarks, infinity]
-  allow_failure: true
-  script:
-    - ant compile
-    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-Savina
+# benchmark_savina_job:
+#   stage: benchmark
+#   tags: [benchmarks, infinity]
+#   allow_failure: true
+#   script:
+#     - ant compile
+#     - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-Savina
+
+# benchmark_savina_csp_job:
+#   stage: benchmark
+#   tags: [benchmarks, infinity]
+#   allow_failure: true
+#   script:
+#     - ant compile
+#     - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-SavinaCSP
 
 benchmark_havlak_native_job:
-  stage: benchmark-havlak-only
+  stage: benchmark
   tags: [benchmark, infinity]
   allow_failure: true
   script:
     - ant native
     - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-native-Havlak
 
-benchmark_job:
-  stage: benchmark
-  tags: [benchmarks, infinity]
-  allow_failure: true
-  script:
-    - ant compile
-    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns
+# benchmark_job:
+#   stage: benchmark
+#   tags: [benchmarks, infinity]
+#   allow_failure: true
+#   script:
+#     - ant compile
+#     - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns
 
-benchmark_job_others:
-  stage: benchmark
-  tags: [benchmarks, infinity]
-  allow_failure: true
-  script:
-    - ant compile
-    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-concurrency-models
-    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-interp
-    - rebench --experiment="CI ID $CI_PIPELINE_ID" --report-completion codespeed.conf
+# benchmark_interp_job:
+#   stage: benchmark
+#   tags: [benchmarks, infinity]
+#   allow_failure: true
+#   script:
+#     - ant compile
+#     - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-interp
 
 benchmark_nightly_job:
   stage: benchmark
