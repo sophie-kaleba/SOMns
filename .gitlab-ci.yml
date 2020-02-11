@@ -1,8 +1,6 @@
 stages:
-  - build-and-test
   - benchmark
   - full-test
-  - virtualbox-image
 
 variables:
   PYTHONUNBUFFERED: "true"
@@ -13,55 +11,11 @@ variables:
 before_script:
   - git submodule update --init
 
-build_and_test_job:
-  stage: build-and-test
-  tags: [benchmarks, infinity]
-  script:
-    - ant checkstyle
-    - ant eclipseformat-check
-    - timeout 5m ant unit-tests som-tests
-
-kompos_and_dym_tests:
-  stage: full-test
-  tags: [benchmarks, infinity]
-  script:
-    - ant jacoco-lib compile dynamic-metrics-tests superinstructions-tests
-    - (cd tools/kompos && npm install . && npm -s run verify && npm test)
-
-replay_tests:
-  stage: full-test
-  tags: [benchmarks, infinity]
-  script:
-    - timeout 30m ant replay-tests
-
-# Disabled due to breaking changes in the tracing infrastructure. Not fixed to make merge of Snapshotting PR(#293) easier.
-#snapshot_tests:
-#  stage: full-test
-#  tags: [benchmarks, infinity]
-#  script:
-#    - timeout 10m ant snapshot-tests
-
 svm_tests:
   stage: full-test
   tags: [benchmarks, infinity]
   script:
     - ant native-tests
-
-# benchmark_savina_job:
-#   stage: benchmark
-#   tags: [benchmarks, infinity]
-#   allow_failure: true
-#   script:
-#     - ant compile
-#     - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-Savina
-
-# benchmark_savina_csp_job:
-#   stage: benchmark
-#   tags: [benchmarks, infinity]
-#   allow_failure: true
-#   script:
-#     - ant compile
-#     - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-SavinaCSP
 
 benchmark_havlak_native_job:
   stage: benchmark
@@ -69,39 +23,4 @@ benchmark_havlak_native_job:
   allow_failure: true
   script:
     - ant native
-    - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-native-Havlak
-
-# benchmark_job:
-#   stage: benchmark
-#   tags: [benchmarks, infinity]
-#   allow_failure: true
-#   script:
-#     - ant compile
-#     - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns
-
-# benchmark_interp_job:
-#   stage: benchmark
-#   tags: [benchmarks, infinity]
-#   allow_failure: true
-#   script:
-#     - ant compile
-#     - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-interp
-
-benchmark_nightly_job:
-  stage: benchmark
-  tags: [benchmarks, infinity]
-  allow_failure: true
-  only:
-    - triggers
-  script:
-    - ant compile
-    - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf nightly
-    - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-Savina-tracing
-
-build_virtualbox:
-  stage: virtualbox-image
-  tags: [benchmarks, infinity]
-  only:
-    - triggers
-  script:
-    - artifact/virtualbox.sh
+    - ./havlak_benchmark.sh
