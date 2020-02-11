@@ -1,6 +1,6 @@
 stages:
   - build-and-test
-  - benchmark
+  - benchmark-havlak-only
   - full-test
   - virtualbox-image
 
@@ -56,7 +56,7 @@ benchmark_savina_job:
     - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf SOMns-Savina
 
 benchmark_havlak_native_job:
-  stage: benchmark
+  stage: benchmark-havlak-only
   tags: [benchmark, infinity]
   allow_failure: true
   script:
