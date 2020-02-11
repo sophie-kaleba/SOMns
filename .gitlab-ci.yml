@@ -65,7 +65,7 @@ svm_tests:
 
 benchmark_havlak_native_job:
   stage: benchmark
-  tags: [benchmark, infinity]
+  tags: [benchmarks, infinity]
   allow_failure: true
   script:
     - ant native
