@@ -4,7 +4,8 @@ git submodule update --recursive
 
 VMS=(
   "e:SOMns-native"
-  # "e:SOMns"
+  #"e:SOMns-graal-tn"
+  #"e:SOMns"
 )
 
 rebench -f "${PARAMS[@]}" codespeed.conf all "${VMS[@]}"
