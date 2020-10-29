@@ -1,5 +1,5 @@
 #!/bin/bash
-PARAMS=("-S" "--experiment=\"CI Benchmark Run Pipeline ID $CI_PIPELINE_ID\"" "--branch=\"$CI_COMMIT_REF_NAME\"")
+PARAMS=("-R" "--experiment=\"CI Benchmark Run Pipeline ID $CI_PIPELINE_ID\"" "--branch=\"$CI_COMMIT_REF_NAME\"")
 git submodule update --recursive
 
 VMS=(
