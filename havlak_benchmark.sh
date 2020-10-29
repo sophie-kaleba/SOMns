@@ -4,8 +4,6 @@ git submodule update --recursive
 
 VMS=(
   "e:SOMns-native"
-  #"e:SOMns-graal-tn"
-  #"e:SOMns"
 )
 
 rebench -f "${PARAMS[@]}" codespeed.conf all "${VMS[@]}"
@@ -24,8 +22,14 @@ TARGET_PATH=$DATA_ROOT/$NUM_PREV-$REV
 LATEST=$DATA_ROOT/latest
 
 mkdir -p $TARGET_PATH
-bzip2 havlak_benchmark.data
+bzip2 havlak_benchmark.data vanilla.log baseline.log phaseonly.log both.log
+ 
 cp havlak_benchmark.data.bz2 $TARGET_PATH/
+cp vanilla.log.bz2 $TARGET_PATH/
+cp baseline.log.bz2 $TARGET_PATH/
+cp phaseonly.log.bz2 $TARGET_PATH/
+cp both.log.bz2 $TARGET_PATH/
+
 rm $LATEST
 ln -s $TARGET_PATH $LATEST
 
