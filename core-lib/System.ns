@@ -67,6 +67,8 @@ class System usingVmMirror: vmMirror = Value (
 
   (* wrap a potential call to GC - allows to a have call to a primitive either way *)
   public experimentalGC: obj = ( vmMirror experimentalGC: obj. )
+
+  public startMicroTime = (^ vmMirror startMicroTime: nil) (* returns the start *)
  )
 
 )

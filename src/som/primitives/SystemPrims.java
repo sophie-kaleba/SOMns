@@ -496,6 +496,16 @@ public final class SystemPrims {
   }
 
   @GenerateNodeFactory
+  @Primitive(primitive = "startMicroTime:")
+  public abstract static class StartTimePrim extends UnarySystemOperation {
+    @Specialization
+    @TruffleBoundary
+    public final long doSObject(final Object receiver) {
+      return startMicroTime;
+    }
+  }
+
+  @GenerateNodeFactory
   @Primitive(primitive = "systemExport:as:")
   public abstract static class ExportAsPrim extends BinarySystemOperation {
     @Specialization

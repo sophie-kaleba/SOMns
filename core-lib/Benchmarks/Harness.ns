@@ -24,6 +24,7 @@ class Harness usingPlatform: platform = Value (
     and output single as well as a total. *)
 | private system = platform system.
   private platform = platform.
+  private Array     = platform kernel Array.
   private ObjectMirror = platform mirrors ObjectMirror.
 |
 )(
@@ -113,13 +114,18 @@ class Harness usingPlatform: platform = Value (
     )
 
     private measure: bench = (
-      | startTime endTime |
+      | startTime endTime totalTime result |
       startTime:: system ticks.
       (bench innerBenchmarkLoop: innerIterations numThreads: numThreads) ifFalse: [
         self error: 'Benchmark failed with incorrect result'. ].
       endTime:: system ticks.
 
-      ^ endTime - startTime.
+      totalTime:: endTime - startTime.
+      result:: Array new: 3.
+      result at: 1 put: totalTime.
+      result at: 2 put: startTime.
+      result at: 3 put: (system startMicroTime).
+      ^ result
     )
 
     doRuns: bench = (
@@ -127,10 +133,10 @@ class Harness usingPlatform: platform = Value (
         | runTime |
         runTime:: measure: bench.
 
-        printAll ifTrue: [ self print: bench run: runTime ].
+        printAll ifTrue: [ self print: bench run: (runTime at:1) start: (runTime at:2) tzero: (runTime at:3)].
 
         i > warmUp ifTrue: [
-          total:: total + runTime ].
+          total:: total + (runTime at: 1) ].
 
         maxRuntime > 0 ifTrue: [
           total > maxRuntime ifTrue: [
@@ -147,7 +153,7 @@ class Harness usingPlatform: platform = Value (
        'us\n') println.
     )
 
-    print: bench run: runTime = (
+    print: bench run: runTime start: startIterationTime tzero: realStart = (
       | stats = system traceStatistics.
         memstats = system memoryStatistics.
       |
@@ -162,7 +168,7 @@ class Harness usingPlatform: platform = Value (
         (name + ': collected:    ' + (memstats at: 3) + 'byte') println.
         (name + ': gc-time: ' + (memstats at: 4) + 'ms') println.
       ].
-      (name + ': iterations=1' + ' runtime: ' + runTime + 'us') println
+      (name + ': iterations=1' + ' runtime: ' + runTime + 'us ' + 'start: ' + startIterationTime + ' tzero: ' + realStart) println
     )
 
     public printTotal = (
