@@ -14,6 +14,7 @@ import com.oracle.truffle.api.source.SourceSection;
 import bd.primitives.Primitive;
 import som.instrumentation.CountingDirectCallNode;
 import som.interpreter.SArguments;
+import som.interpreter.SomLanguage;
 import som.interpreter.nodes.ExceptionSignalingNode;
 import som.interpreter.nodes.ExpressionNode;
 import som.interpreter.nodes.SOMNode;
@@ -26,6 +27,7 @@ import som.vm.VmSettings;
 import som.vmobjects.SArray;
 import som.vmobjects.SBlock;
 import som.vmobjects.SInvokable;
+import tools.dym.MetricsCsvWriter;
 import tools.dym.Tags.OpClosureApplication;
 
 
@@ -85,6 +87,11 @@ public abstract class BlockPrims {
     public final Object doCachedBlock(final SBlock receiver,
         @Cached("createDirectCallNode(receiver, getThis())") final DirectCallNode call,
         @Cached("receiver.getMethod()") final SInvokable cached) {
+      String oldss = MetricsCsvWriter.getSourceSectionAbbrvOld(this.getSourceSection());
+      String ss = MetricsCsvWriter.getSourceSectionAbbrv(this.getSourceSection());
+      String target = cached.getCallTarget().toString();
+      String shortTargetName = cached.getCallTarget().getRootNode().getName();
+      System.out.println(oldss+"\t"+ss+"\t"+target+"\t"+shortTargetName);
       return call.call(new Object[] {receiver});
     }
 
@@ -141,6 +148,11 @@ public abstract class BlockPrims {
     public final Object doCachedBlock(final SBlock receiver, final Object arg,
         @Cached("createDirectCallNode(receiver, getThis())") final DirectCallNode call,
         @Cached("receiver.getMethod()") final SInvokable cached) {
+      String oldss = MetricsCsvWriter.getSourceSectionAbbrvOld(this.getSourceSection());
+      String ss = MetricsCsvWriter.getSourceSectionAbbrv(this.getSourceSection());
+      String target = cached.getCallTarget().toString();
+      String shortTargetName = cached.getCallTarget().getRootNode().getName();
+      System.out.println(oldss+"\t"+ss+"\t"+target+"\t"+shortTargetName);
       return call.call(new Object[] {receiver, arg});
     }
 
@@ -184,6 +196,11 @@ public abstract class BlockPrims {
         final Object arg2,
         @Cached("createDirectCallNode(receiver, getThis())") final DirectCallNode call,
         @Cached("receiver.getMethod()") final SInvokable cached) {
+      String oldss = MetricsCsvWriter.getSourceSectionAbbrvOld(this.getSourceSection());
+      String ss = MetricsCsvWriter.getSourceSectionAbbrv(this.getSourceSection());
+      String target = cached.getCallTarget().toString();
+      String shortTargetName = cached.getCallTarget().getRootNode().getName();
+      System.out.println(oldss+"\t"+ss+"\t"+target+"\t"+shortTargetName);
       return call.call(new Object[] {receiver, arg1, arg2});
     }
 

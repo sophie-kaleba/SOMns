@@ -1,18 +1,12 @@
 package tools.dym;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 
+import bd.tools.nodes.Invocation;
+import com.oracle.truffle.api.nodes.Node;
 import org.graalvm.collections.EconomicMap;
 import org.graalvm.collections.EconomicSet;
 
@@ -24,6 +18,7 @@ import som.compiler.MixinDefinition;
 import som.compiler.MixinDefinition.SlotDefinition;
 import som.compiler.Variable;
 import som.interpreter.Invokable;
+import som.interpreter.nodes.MessageSendNode;
 import som.interpreter.nodes.dispatch.Dispatchable;
 import som.interpreter.objectstorage.ClassFactory;
 import som.vm.NotYetImplementedException;
@@ -89,6 +84,21 @@ public final class MetricsCsvWriter {
       final Map<String, AtomicLong> generalStats) {
     new MetricsCsvWriter(data, metricsFolder, structuralProbe, maxStackHeight,
         allStatements, generalStats).createCsvFiles();
+  }
+
+  public static void fileOutDetails(
+          final Map<String, Map<SourceSection, ? extends JsonSerializable>> data,
+          final String metricsFolder,
+          // TODO: remove direct StructuralProbe passing hack
+          final StructuralProbe<SSymbol, MixinDefinition, SInvokable, SlotDefinition, Variable> structuralProbe,
+          final int maxStackHeight, final List<SourceSection> allStatements,
+          final Map<String, AtomicLong> generalStats, ArrayList<Object[]> allDetails) {
+    new MetricsCsvWriter(data, metricsFolder, structuralProbe, maxStackHeight,
+        allStatements, generalStats).createDetailsFile(allDetails);
+  }
+
+  private void createDetailsFile(ArrayList<Object[]> allDetails) {
+    methodDetails(allDetails);
   }
 
   private void createCsvFiles() {
@@ -401,6 +411,19 @@ public final class MetricsCsvWriter {
     }
   }
 
+  private void methodDetails(ArrayList<Object[]> allDetails) {
+    try (CsvWriter file = new CsvWriter(metricsFolder, "method-details.csv",
+        "Source Identifier", "Selector", "Target")) {
+      for (Object[] e : allDetails) {
+        MessageSendNode.GenericMessageSendNode sendNode = (MessageSendNode.GenericMessageSendNode) e[1];
+        file.write(
+            getSourceSectionAbbrv((SourceSection) e[0]),
+               sendNode.getInvocationIdentifier(),
+                e[2]);
+      }
+    }
+  }
+
   private void closureApplications() {
     @SuppressWarnings("unchecked")
     Map<SourceSection, ClosureApplicationProfile> profiles =
@@ -549,9 +572,15 @@ public final class MetricsCsvWriter {
     }
   }
 
-  private static String getSourceSectionAbbrv(final SourceSection source) {
+  public static String getSourceSectionAbbrv(final SourceSection source) {
     String result = source.getSource().getName() + ":" + source.getStartLine() + ":"
         + source.getStartColumn() + ":" + source.getCharLength();
+    return result;
+  }
+
+  public static String getSourceSectionAbbrvOld(final SourceSection source) {
+    String result = source.getSource().getName() + " pos=" + source.getCharIndex() + " len="
+            + source.getCharLength();
     return result;
   }
 

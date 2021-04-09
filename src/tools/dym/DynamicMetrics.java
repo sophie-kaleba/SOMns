@@ -68,6 +68,7 @@ import tools.dym.Tags.VirtualInvoke;
 import tools.dym.Tags.VirtualInvokeReceiver;
 import tools.dym.nodes.AllocationProfilingNode;
 import tools.dym.nodes.ArrayAllocationProfilingNode;
+import tools.dym.nodes.CallDetailsNode;
 import tools.dym.nodes.ControlFlowProfileNode;
 import tools.dym.nodes.CountingNode;
 import tools.dym.nodes.FarRefTypeProfilingNode;
@@ -136,6 +137,7 @@ public class DynamicMetrics extends TruffleInstrument {
 
   private final Map<SourceSection, InvocationProfile>         methodInvocationCounter;
   private final Map<SourceSection, CallsiteProfile>           methodCallsiteProfiles;
+  public final ArrayList<Object[]> testDetails;
   private final Map<SourceSection, ClosureApplicationProfile> closureProfiles;
   private final Map<SourceSection, OperationProfile>          operationProfiles;
 
@@ -189,6 +191,8 @@ public class DynamicMetrics extends TruffleInstrument {
 
     methodInvocationCounter = new HashMap<>();
     methodCallsiteProfiles = new HashMap<>();
+    testDetails = new ArrayList<Object[]>();
+
     closureProfiles = new HashMap<>();
     operationProfiles = new HashMap<>();
 
@@ -263,6 +267,18 @@ public class DynamicMetrics extends TruffleInstrument {
     });
   }
 
+  private void addMethodDetails(final Instrumenter instrumenter) {
+    Builder filters = SourceSectionFilter.newBuilder();
+    filters.tagIs(VirtualInvoke.class);
+
+    instrumenter.attachExecutionEventFactory(filters.build(), (final EventContext ctx) -> {
+      RootNode root = ctx.getInstrumentedNode().getRootNode();
+      SourceSection ss = ctx.getInstrumentedSourceSection();
+      return new CallDetailsNode(this, ss, root, ctx.getInstrumentedNode());
+    }
+    );
+  }
+
   private static String getOperation(final Node node) {
     if (node instanceof Operation) {
       return ((Operation) node).getOperation();
@@ -331,6 +347,7 @@ public class DynamicMetrics extends TruffleInstrument {
     });
   }
 
+
   private ExecutionEventNodeFactory addVirtualInvokeInstrumentation(
       final Instrumenter instrumenter) {
     Builder filters = SourceSectionFilter.newBuilder();
@@ -347,6 +364,36 @@ public class DynamicMetrics extends TruffleInstrument {
     return factory;
   }
 
+  private ExecutionEventNodeFactory addClosureInstrumentation(final Instrumenter instrumenter) {
+    Builder filters = SourceSectionFilter.newBuilder();
+    filters.tagIs(VirtualInvoke.class);
+
+    ExecutionEventNodeFactory factory = (final EventContext ctx) -> {
+      ClosureApplicationProfile profile = closureProfiles.computeIfAbsent(
+              ctx.getInstrumentedSourceSection(),
+              (final SourceSection source) -> new ClosureApplicationProfile(source));
+      return new CountingNode<ClosureApplicationProfile>(profile);
+            };
+
+    instrumenter.attachExecutionEventFactory(filters.build(), factory);
+    return factory;
+  }
+
+  private void addClosureReceiverInstrumentation(final Instrumenter instrumenter,
+                                          final ExecutionEventNodeFactory virtInvokeFactory) {
+    Builder filters = SourceSectionFilter.newBuilder();
+    filters.tagIs(VirtualInvokeReceiver.class);
+
+    instrumenter.attachExecutionEventFactory(filters.build(), (final EventContext ctx) -> {
+      ExecutionEventNode parent = ctx.findDirectParentEventNode(virtInvokeFactory);
+
+      @SuppressWarnings("unchecked")
+      CountingNode<ClosureApplicationProfile> p = (CountingNode<ClosureApplicationProfile>) parent;
+      ClosureApplicationProfile profile = p.getProfile();
+      return new ReportReceiverNode(profile);
+    });
+  }
+
   private static final Class<?>[] NO_TAGS = new Class<?>[0];
 
   @Override
@@ -354,10 +401,14 @@ public class DynamicMetrics extends TruffleInstrument {
     instrumenter = env.getInstrumenter();
 
     addRootTagInstrumentation(instrumenter);
+    addMethodDetails(instrumenter);
 
     ExecutionEventNodeFactory virtInvokeFactory =
         addVirtualInvokeInstrumentation(instrumenter);
     addReceiverInstrumentation(instrumenter, virtInvokeFactory);
+
+//    ExecutionEventNodeFactory closFactory = addClosureInstrumentation(instrumenter);
+//    addClosureReceiverInstrumentation(instrumenter, closFactory);
 
     addInstrumentation(
         instrumenter, closureProfiles,
@@ -447,6 +498,11 @@ public class DynamicMetrics extends TruffleInstrument {
     String metricsFolder = System.getProperty("dm.metrics", "metrics");
     MetricsCsvWriter.fileOut(data, metricsFolder, structuralProbe,
         maxStackDepth, getAllStatementsAlsoNotExecuted(), generalMetrics);
+
+    String methodsDetailsFolder = System.getProperty("dm.metrics", "metrics");
+    MetricsCsvWriter.fileOutDetails(data, methodsDetailsFolder, structuralProbe,
+        maxStackDepth, getAllStatementsAlsoNotExecuted(), generalMetrics, testDetails);
+    // TODO - here create a new file for what you want
 
     outputAllTruffleMethodsToIGV();
   }

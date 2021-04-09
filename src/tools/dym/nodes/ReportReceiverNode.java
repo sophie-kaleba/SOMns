@@ -4,12 +4,18 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.instrumentation.ExecutionEventNode;
 
 import tools.dym.profiles.CallsiteProfile;
+import tools.dym.profiles.ClosureApplicationProfile;
 
 
 public class ReportReceiverNode extends ExecutionEventNode {
   @Child protected TypeProfileNode typeProfile;
 
   public ReportReceiverNode(final CallsiteProfile profile) {
+    typeProfile = TypeProfileNodeGen.create(profile);
+    profile.setReceiverProfile(typeProfile);
+  }
+
+  public ReportReceiverNode(final ClosureApplicationProfile profile) {
     typeProfile = TypeProfileNodeGen.create(profile);
     profile.setReceiverProfile(typeProfile);
   }
